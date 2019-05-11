@@ -33,12 +33,10 @@ function getCityNames(filename) {
 }
 
 (async () => {
-
     let cityNames = await getCityNames("cities15000.txt");
 
-
     for(let files of fileChunks){
-        var index = new FlexSearch({async: true, worker: true});
+        let index = new FlexSearch({async: true});
 
         for (let file of files) {
             let fileContent = fs.readFileSync("./zipfiles/"+file, 'utf8');
@@ -48,7 +46,6 @@ function getCityNames(filename) {
 
         for (let cityName of cityNames) {
             let locations = await index.search(cityName);
-
             console.log(cityName+" in "+locations)
         }
     }
