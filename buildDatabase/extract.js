@@ -7,23 +7,20 @@ function take25lines(text) {
     return smallText;
 }
 
-function extractAuthorName(text){
-    const smallText = take25lines(text)
+function extractAuthorName(smallText){
     const pattern = /^(Author: )(.*)/gm;
     let match = pattern.exec(smallText);
     return match[2];
 }
 
 
-function extractTitle(text, partstr) {
-    const smallText = take25lines(text)
+function extractTitle(smallText, partstr) {
     const pattern = /^(Title: )(.*)/gm;
     let match = pattern.exec(smallText);
     return match[2].replace(new RegExp(partstr, 'g'), '').replace(/(\.|,|\s)+$/, '')
 }
 
-function extractPart(text) {
-    const smallText = take25lines(text)
+function extractPart(smallText) {
     const pattern = /^(Title: )(.*(Part \d*))/gm;
     let match = pattern.exec(smallText);
     if (match != null) {

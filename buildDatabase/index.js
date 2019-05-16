@@ -40,18 +40,23 @@ let removeUnknown = (cityNames, bookLocations) => {
 
         let partCities = await Promise.all(
             partition.map(async filename =>  {
-                let bookLocations = await locationsFromText(filename);
-
-                let cleanedCities = removeUnknown(cities, bookLocations);
-                
                 let fileContent = await new Promise(
                     resolve => fs.readFile(__dirname + '/../zipfiles/'+filename, function(err,data){
                         resolve(data.toString());
                     })
                 )
-                let Part = extractors.extractPart(fileContent);
-                let Authorname = extractors.extractAuthorName(fileContent);
-                let Title = extractors.extractTitle(fileContent,Part);
+                fileContent = extractors.removeFooter(fileContent);
+
+                await new Promise(
+                    resolve => fs.writeFile(__dirname + '/../zipfiles/'+filename, fileContent, resolve)
+                )
+                let bookLocations = await locationsFromText(filename);
+                let cleanedCities = removeUnknown(cities, bookLocations);
+                let smalltext = extractors.take25lines(fileContent)
+                let Part = extractors.extractPart(smalltext);
+                let Authorname = extractors.extractAuthorName(smalltext);
+                let Title = extractors.extractTitle(smalltext,Part);
+
 
                 return [filename, cleanedCities, Authorname, Title, Part];
             })
