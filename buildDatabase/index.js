@@ -2,19 +2,15 @@ const fs = require('fs');
 const readCity = require('./readCity');
 const locationsFromText = require('./locactionsFromText');
 const extractors = require('./extract');
+const _cliProgress = require('cli-progress');
 
 let allFiles = fs.readdirSync('./zipfiles/');
-let bookAndCities = {};
 
-function chunks(arr, size) {
-    let output = [];
-    for (let i = 0; i < arr.length; i += size) {
-      output.push(arr.slice(i, i + size));
-    }
-    return output;
-}
+const os = require('os'),
+cpuCount = os.cpus().length;
 
-let partitions = chunks(allFiles, 4)
+
+
 
 let removeUnknown = (cityNames, bookLocations) => {
     let cleaned = [];
@@ -33,46 +29,82 @@ let removeUnknown = (cityNames, bookLocations) => {
 }
 
 
-(async () => {
-    let {names: cities} = await readCity("cities15000.txt");
-
-    for (let partition of partitions) {
-
-        let partCities = await Promise.all(
-            partition.map(async filename =>  {
-                let fileContent = await new Promise(
-                    resolve => fs.readFile(__dirname + '/../zipfiles/'+filename, function(err,data){
-                        resolve(data.toString());
-                    })
-                )
-                fileContent = extractors.removeFooter(fileContent);
-
-                await new Promise(
-                    resolve => fs.writeFile(__dirname + '/../zipfiles/'+filename, fileContent, resolve)
-                )
-                let bookLocations = await locationsFromText(filename);
-                let cleanedCities = removeUnknown(cities, bookLocations);
-                let smalltext = extractors.take25lines(fileContent)
-                let Part = extractors.extractPart(smalltext);
-                let Authorname = extractors.extractAuthorName(smalltext);
-                let Title = extractors.extractTitle(smalltext,Part);
+class Schedule {
+    constructor(jobs, parallel){
+        this.jobs = jobs.reverse();
+        this.noJobs;
+        this.parallel = parallel;
+        this.bar = new _cliProgress.Bar({}, _cliProgress.Presets.shades_classic);
 
 
-                return [filename, cleanedCities, Authorname, Title, Part];
-            })
-        )
-
-        for(let [filename, ...bookinfo] of partCities){
-            bookAndCities[filename] = bookinfo;
-        }
-
-        console.log(Object.keys(bookAndCities).length)
-        console.log(JSON.stringify(partCities, null, 2))
-
-        fs.writeFileSync('./booksAndCities.json', JSON.stringify(bookAndCities), 'utf8');
-
+        this.worker = this.worker.bind(this)
+        this.start = this.start.bind(this)
     }
 
+    async worker(){
+        while(this.jobs.length>0){
+            this.bar.update(this.noJobs - this.jobs.length)
+            let jobMetadata = this.jobs.pop();
+            await this.createJob(jobMetadata)
+        }
+    }
+
+    async start(){
+        this.bar.start(this.jobs.length, 0)
+        this.noJobs = this.jobs.length;
+        let workers = []
+        for (let index = 0; index < this.parallel; index++) {
+            workers.push(this.worker())
+        }
+        await Promise.all(workers)
+        this.bar.update(this.noJobs)
+        this.bar.stop();
+    }
+}
+
+
+(async () => {
+
+    let bookAndCities = {};
+    let {names: cities} = await readCity("cities15000.txt");
+
+
+    let producer = new Schedule(allFiles, cpuCount)
+
+    producer.createJob = async filename => {
+        let fileContent = await new Promise(
+            resolve => fs.readFile(__dirname + '/../zipfiles/'+filename, function(err,data){
+                resolve(data.toString());
+            })
+        )
+        fileContent = extractors.removeFooter(fileContent);
+
+        await new Promise(
+            resolve => fs.writeFile(__dirname + '/../zipfiles/'+filename, fileContent, resolve)
+        )
+        let bookLocation = removeUnknown(cities, await locationsFromText(filename));
+        let smalltext = extractors.take25lines(fileContent)
+
+
+        let Part = extractors.extractPart(smalltext);
+        bookAndCities[filename] = {
+            Part,
+            Authorname : extractors.extractAuthorName(smalltext),
+            Title : extractors.extractTitle(smalltext,Part),
+            cities: bookLocation
+        };
+        
+
+        if(Math.random()>.9){
+            fs.writeFileSync('./booksAndCities.json', JSON.stringify(bookAndCities), 'utf8');
+        }
+    }
+
+    await producer.start()
+    fs.writeFileSync('./booksAndCities.json', JSON.stringify(bookAndCities), 'utf8');
+
+
+    process.exit();
 })();
 
 
