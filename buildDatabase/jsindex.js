@@ -1,7 +1,6 @@
 var mysql = require('mysql2/promise');
 let dbName = "greenbugDb";
 
-
 (async () => {
 
     let con = await mysql.createConnection({

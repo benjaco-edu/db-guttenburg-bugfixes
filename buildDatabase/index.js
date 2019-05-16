@@ -1,6 +1,7 @@
 const fs = require('fs');
 const readCity = require('./readCity');
 const locationsFromText = require('./locactionsFromText');
+const extractors = require('./extract');
 
 let allFiles = fs.readdirSync('./zipfiles/');
 let bookAndCities = {};
@@ -42,15 +43,23 @@ let removeUnknown = (cityNames, bookLocations) => {
                 let bookLocations = await locationsFromText(filename);
 
                 let cleanedCities = removeUnknown(cities, bookLocations);
+                
+                let fileContent = await new Promise(
+                    resolve => fs.readFile(__dirname + '/../zipfiles/'+filename, function(err,data){
+                        resolve(data.toString());
+                    })
+                )
+                let Part = extractors.extractPart(fileContent);
+                let Authorname = extractors.extractAuthorName(fileContent);
+                let Title = extractors.extractTitle(fileContent,Part);
 
-                return [filename, cleanedCities];
+                return [filename, cleanedCities, Authorname, Title, Part];
             })
         )
 
-        for(let [filename, cleaned] of partCities){
-            bookAndCities[filename] = cleaned;
+        for(let [filename, ...bookinfo] of partCities){
+            bookAndCities[filename] = bookinfo;
         }
-
 
         console.log(Object.keys(bookAndCities).length)
         console.log(JSON.stringify(partCities, null, 2))
