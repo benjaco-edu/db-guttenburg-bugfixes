@@ -7,7 +7,7 @@ const _cliProgress = require('cli-progress');
 let allFiles = fs.readdirSync('./zipfiles/');
 
 const os = require('os'),
-cpuCount = os.cpus().length;
+    cpuCount = os.cpus().length;
 
 
 
@@ -15,9 +15,9 @@ cpuCount = os.cpus().length;
 let removeUnknown = (cityNames, bookLocations) => {
     let cleaned = [];
 
-    for(let bookLocation of bookLocations){
+    for (let bookLocation of bookLocations) {
         let id = cityNames[bookLocation[1]]
-        if(typeof id !== "undefined"){
+        if (typeof id !== "undefined") {
             cleaned.push({
                 index: bookLocation[0],
                 cityIndex: id
@@ -30,7 +30,7 @@ let removeUnknown = (cityNames, bookLocations) => {
 
 
 class Schedule {
-    constructor(jobs, parallel){
+    constructor(jobs, parallel) {
         this.jobs = jobs.reverse();
         this.noJobs;
         this.parallel = parallel;
@@ -41,15 +41,15 @@ class Schedule {
         this.start = this.start.bind(this)
     }
 
-    async worker(){
-        while(this.jobs.length>0){
+    async worker() {
+        while (this.jobs.length > 0) {
             this.bar.update(this.noJobs - this.jobs.length)
             let jobMetadata = this.jobs.pop();
             await this.createJob(jobMetadata)
         }
     }
 
-    async start(){
+    async start() {
         this.bar.start(this.jobs.length, 0)
         this.noJobs = this.jobs.length;
         let workers = []
@@ -66,42 +66,59 @@ class Schedule {
 (async () => {
 
     let bookAndCities = {};
-    let {names: cities} = await readCity("cities15000.txt");
+    let { names: cities } = await readCity("cities15000.txt");
+    let errors = ""
 
 
     let producer = new Schedule(allFiles, cpuCount)
 
     producer.createJob = async filename => {
-        let fileContent = await new Promise(
-            resolve => fs.readFile(__dirname + '/../zipfiles/'+filename, function(err,data){
-                resolve(data.toString());
-            })
-        )
-        fileContent = extractors.removeFooter(fileContent);
-
-        await new Promise(
-            resolve => fs.writeFile(__dirname + '/../zipfiles/'+filename, fileContent, resolve)
-        )
-        let bookLocation = removeUnknown(cities, await locationsFromText(filename));
-        let smalltext = extractors.take25lines(fileContent)
 
 
-        let Part = extractors.extractPart(smalltext);
-        bookAndCities[filename] = {
-            Part,
-            Authorname : extractors.extractAuthorName(smalltext),
-            Title : extractors.extractTitle(smalltext,Part),
-            cities: bookLocation
-        };
-        
+        try {
+            let fileContent = await new Promise(
+                resolve => fs.readFile(__dirname + '/../zipfiles/' + filename, function (err, data) {
+                    resolve(data.toString());
+                })
+            )
+            fileContent = extractors.removeFooter(fileContent);
 
-        if(Math.random()>.9){
+            await new Promise(
+                resolve => fs.writeFile(__dirname + '/../zipfiles/' + filename, fileContent, resolve)
+            )
+            let bookLocation = removeUnknown(cities, await locationsFromText(filename));
+            try {
+                let smalltext = extractors.take25lines(fileContent)
+
+                let Part = extractors.extractPart(smalltext);
+                bookAndCities[filename] = {
+                    Part,
+                    Authorname: extractors.extractAuthorName(smalltext),
+                    Title: extractors.extractTitle(smalltext, Part),
+                    cities: bookLocation
+                };
+            } catch (error) {
+                bookAndCities[filename] = {
+                    error: "Error",
+                    cities: bookLocation
+                };
+            }
+            
+
+        } catch (e) {
+            errors += filename +"\n"+ e.toString()+"\n"+"\n";
+        }
+
+
+        if (Math.random() > .9) {
             fs.writeFileSync('./booksAndCities.json', JSON.stringify(bookAndCities), 'utf8');
+            fs.writeFileSync('./errors.json', JSON.stringify(errors), 'utf8');
         }
     }
 
     await producer.start()
     fs.writeFileSync('./booksAndCities.json', JSON.stringify(bookAndCities), 'utf8');
+    fs.writeFileSync('./errors.json', JSON.stringify(errors), 'utf8');
 
 
     process.exit();
