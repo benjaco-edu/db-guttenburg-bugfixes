@@ -13,7 +13,9 @@
   "dependencies": {
     "cli-progress": "2.1.1",
     "fast-csv": "^2.5.0",
+    "http-server": "^0.11.1",
     "mongo": "^0.1.0",
-    "mysql2": "^1.6.5"
+    "mysql2": "^1.6.5",
+    "simplehttpserver": "^0.3.0"
   }
 }

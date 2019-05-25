@@ -6,12 +6,12 @@ const Readable = require('stream').Readable
 
 
 
-
 module.exports = async function ({ cities, bookParts, relations }) {
+
 
     console.log("Start mysql import")
 
-    this.con = await mysql.createConnection({
+    let con = await mysql.createConnection({
         host: "localhost",
         user: "nodejs",
         password: "nodecode"
@@ -22,15 +22,32 @@ module.exports = async function ({ cities, bookParts, relations }) {
     await con.execute(`DROP DATABASE if exists ${dbName};`);
     await con.execute(`CREATE DATABASE ${dbName};`);
 
-    this.con = await mysql.createConnection({
+
+
+
+
+    con = await mysql.createConnection({
         host: "localhost",
         user: "nodejs",
         password: "nodecode",
         database: dbName
     });
 
+    console.log("Connected to "+dbName)
+
+    //const stream = new Readable()
+
+    let fs = require('fs');
+    try {
+        fs.unlinkSync("somefile.txt")
+    } catch (error) {
+        
+    }
+    var stream = fs.createWriteStream('someFile.txt', { flags : 'w' });
+    //stream.pipe(filestream)
+    
     //Locations - id, locname, point
-    await con.execute(`
+    stream.write(`
         CREATE table Locations(
             id INT , 
             
@@ -44,7 +61,7 @@ module.exports = async function ({ cities, bookParts, relations }) {
     `);
 
     //BookParts - id, title, part, author
-    await con.execute(`
+    stream.write(`
         CREATE table BookParts(
             id INT , 
 
@@ -57,7 +74,7 @@ module.exports = async function ({ cities, bookParts, relations }) {
     `);
 
     //BookLocations - bookparts_id, location_id
-    await con.execute(`
+    stream.write(`
         CREATE TABLE BookLocations(
             bookparts_id INT,
             location_id INT,
@@ -71,46 +88,73 @@ module.exports = async function ({ cities, bookParts, relations }) {
 
     console.log("db created")
 
-    await con.execute("set autocommit=0;")
+    stream.write("set autocommit=0;")
 
     let i = 0
 
-    console.log("city")
     for (let item of cities) {
-        await con.execute(`insert into Locations (id, name, coordinate, population, timezone) values (?,?,ST_GeomFromText("POINT(${item.lat} ${item.lng})", 4326),?,?)`,
-            [item.id, item.name, item.population, item.tz])
+        stream.write(`insert into Locations (id, name, coordinate, population, timezone) values (
+            ${item.id},
+            "${String(item.name).replace(/"/g,'\\"')}",
+            ST_GeomFromText("POINT(${item.lat} ${item.lng})", 4326), 
+            ${item.population}, 
+            "${String(item.tz)}"); `)
+
         if ((i++) % 100 == 0) {
-            await con.execute("COMMIT;");
-            console.log(".");
+            stream.write("COMMIT;");
         }
     }
 
-    await con.execute("COMMIT;")
+    stream.write("COMMIT;")
 
-    console.log("bookpart");
     for (let item of bookParts) {
-        await con.execute(`insert into BookParts (id, title, part, author) values (?,?,?,?)`,
-            [item.id, item.title, item.part, item.author])
+        stream.write(`insert into BookParts (id, title, part, author) values (
+            ${item.id},
+            "${String(item.title).replace(/"/g,'\\"')}",
+            "${String(item.part).replace(/"/g,'\\"')}",
+            "${String(item.author).replace(/"/g,'\\"')}"
+        ); `);
+
         if ((i++) % 100 == 0) {
-            await con.execute("COMMIT;");
-            console.log(".");
+            stream.write("COMMIT;");
         }
     }
-    await con.execute("COMMIT;")
+    stream.write("COMMIT;")
 
 
-    console.log("relations")
     for (let item of relations) {
-        await con.execute(`insert into BookLocations (bookparts_id, location_id, index_in_book) values (?,?,?)`,
-            [item.bookpartsId, item.locationId, item.indexInBook])
+        stream.write(`insert into BookLocations (bookparts_id, location_id, index_in_book) values (
+            ${item.bookpartsId}, 
+            ${item.locationId},
+            ${item.indexInBook}
+        );` );
+            
         if ((i++) % 100 == 0) {
-            await con.execute("COMMIT;");
-            console.log(".");
+            stream.write("COMMIT;");
         }
     }
-    await con.execute("COMMIT;");
+    stream.write("COMMIT;");
+    stream.end()
+
+    await new Promise((resolve, reject) => {
+        stream.on('close', () => {
+            console.log('There will be no more data.');
+            resolve();
+        });
+    })
+   
 
 
-    console.log("done");
+    // local stream
+    /*
+    const sql = 'source ./stream.sql;';
+    await con.query({
+        sql: sql,
+        infileStreamFactory: function (path) { console.log("make a stream for "+path); return stream }
+    });
+
+    console.log("done");*/
+
+    
 
 }
