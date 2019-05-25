@@ -1,127 +1,56 @@
-const fs = require('fs');
-const readCity = require('./readCity');
-const locationsFromText = require('./locactionsFromText');
-const extractors = require('./extract');
-const _cliProgress = require('cli-progress');
+let fs = require("fs");
+const readCity = require('../common/readCity');
 
-let allFiles = fs.readdirSync('./zipfiles/');
+let mysqlImporter = require("./mysqlImporter");
+//let mongoDbImporter = require("./mongoDbImporter");
 
-const os = require('os'),
-    cpuCount = os.cpus().length;
+let booksAndCities = JSON.parse(fs.readFileSync("../booksAndCities.json"))
 
-
-
-
-let removeUnknown = (cityNames, bookLocations) => {
-    let cleaned = [];
-
-    for (let bookLocation of bookLocations) {
-        let id = cityNames[bookLocation[1]]
-        if (typeof id !== "undefined") {
-            cleaned.push({
-                index: bookLocation[0],
-                cityIndex: id
-            })
-        }
-    }
-
-    return cleaned;
-}
-
-
-class Schedule {
-    constructor(jobs, parallel) {
-        this.jobs = jobs.reverse();
-        this.noJobs;
-        this.parallel = parallel;
-        this.bar = new _cliProgress.Bar({}, _cliProgress.Presets.shades_classic);
-
-
-        this.worker = this.worker.bind(this)
-        this.start = this.start.bind(this)
-    }
-
-    async worker() {
-        while (this.jobs.length > 0) {
-            this.bar.update(this.noJobs - this.jobs.length)
-            let jobMetadata = this.jobs.pop();
-            await this.createJob(jobMetadata)
-        }
-    }
-
-    async start() {
-        this.bar.start(this.jobs.length, 0)
-        this.noJobs = this.jobs.length;
-        let workers = []
-        for (let index = 0; index < this.parallel; index++) {
-            workers.push(this.worker())
-        }
-        await Promise.all(workers)
-        this.bar.update(this.noJobs)
-        this.bar.stop();
-    }
-}
-
-
-(async () => {
-
-    let bookAndCities = {};
-    let { names: cities } = await readCity("cities15000.txt");
-    let errors = ""
-
-
-    let producer = new Schedule(allFiles, cpuCount)
-
-    producer.createJob = async filename => {
-
-
-        try {
-            let fileContent = await new Promise(
-                resolve => fs.readFile(__dirname + '/../zipfiles/' + filename, function (err, data) {
-                    resolve(data.toString());
+// [item.id, item.name, `POINT(${item.lat}, ${item.lon})`, item.population, item.timezone])
+async function insertIntoMysql(cities){
+    await mysqlImporter({
+        cities: Object.entries(cities)
+            .map(([id, city]) => {
+                return {
+                    id,
+                    ...city
+                }
+            }),
+        bookParts: Object.entries(booksAndCities)
+            .map(([id, book]) => {
+                return {
+                    id,
+                    part: book.Part,
+                    title: book.Title,
+                    author: book.Authorname
+                }
+            }),
+        relations: Object.entries(booksAndCities)
+            .map(([bookId, book]) => {
+                return book.cities.map(city => {
+                    return {
+                        bookpartsId: bookId, 
+                        locationId: parseInt(city.cityIndex), 
+                        indexInBook: city.index
+                    }
                 })
-            )
-            fileContent = extractors.removeFooter(fileContent);
+            })
+            .flat()
+    })
+}
 
-            await new Promise(
-                resolve => fs.writeFile(__dirname + '/../zipfiles/' + filename, fileContent, resolve)
-            )
-            let bookLocation = removeUnknown(cities, await locationsFromText(filename));
-            try {
-                let smalltext = extractors.take25lines(fileContent)
+async function insertIntoMongo(){
 
-                let Part = extractors.extractPart(smalltext);
-                bookAndCities[filename] = {
-                    Part,
-                    Authorname: extractors.extractAuthorName(smalltext),
-                    Title: extractors.extractTitle(smalltext, Part),
-                    cities: bookLocation
-                };
-            } catch (error) {
-                bookAndCities[filename] = {
-                    error: "Error",
-                    cities: bookLocation
-                };
-            }
-            
-
-        } catch (e) {
-            errors += filename +"\n"+ e.toString()+"\n"+"\n";
-        }
+}
 
 
-        if (Math.random() > .9) {
-            fs.writeFileSync('./booksAndCities.json', JSON.stringify(bookAndCities), 'utf8');
-            fs.writeFileSync('./errors.json', JSON.stringify(errors), 'utf8');
-        }
-    }
+(async ()=>{
+    let { objects: cities } = await readCity("cities15000.txt");
 
-    await producer.start()
-    fs.writeFileSync('./booksAndCities.json', JSON.stringify(bookAndCities), 'utf8');
-    fs.writeFileSync('./errors.json', JSON.stringify(errors), 'utf8');
 
+    await insertIntoMysql(cities);
+    await insertIntoMongo();
+    
 
     process.exit();
-})();
-
-
+})()
