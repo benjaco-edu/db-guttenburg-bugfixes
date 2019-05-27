@@ -97,13 +97,13 @@ const readCity = require('../common/readCity');
 function getAllBookObjects(file) {
     return Object.entries(file).map(x => {
         return {
+            'id': parseInt(x[0].replace(".txt", "")),
+            'title': x[1].Title,
             'author': x[1].Authorname,
             'part': x[1].Part,
-            'title': x[1].Title,
-            'ref': parseInt(x[0].replace(".txt", "")),
             'locations': x[1].cities.map(c => {
                 return {
-                    'indexInBook': c.index,
+                    'indexInBook': parseInt(c.index),
                     'locationRef': parseInt(c.cityIndex)
                 }
             })
@@ -114,11 +114,11 @@ function getAllBookObjects(file) {
 function getAllLocationObjects(cities, locationToBookRefs) {
     return Object.entries(cities).map(x => {
         return {
-            'id': x[0],
+            'id': parseInt(x[0]),
             'name': x[1].name,
-            'population': x[1].population,
+            'population': parseInt(x[1].population),
             'tz': x[1].tz,
-            'coordinate': { type: "Point", coordinates: [x[1].lng, x[1].lat] },
+            'coordinate': { type: "Point", coordinates: [parseFloat(x[1].lng), parseFloat(x[1].lat)] },
             'booksRef': (() => {
                 if (locationToBookRefs[x[0]] === undefined)
                     return []
