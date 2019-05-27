@@ -7,17 +7,26 @@ function take25lines(text) {
     return smallText;
 }
 
-function extractAuthorName(smallText){
-    const pattern = /^(Author: )(.*)/gm;
+function extractAuthorName(smallText){    
+    const pattern = /^(Author: )(.*)/gm;        // author name is formatted differently between files
+    const pattern2 = /(by )([a-zA-Z|\h]*)/gm;   // 2nd version   
     let match = pattern.exec(smallText);
-    return match[2];
-}
+    if (match !== null)
+        return match[2];
 
+    match = pattern2.exec(smallText)
+        return match[2];
+}
 
 function extractTitle(smallText, partstr) {
     const pattern = /^(Title: )(.*)/gm;
+    const pattern2 = /^(The Project Gutenberg EBook of )([a-zA-Z|\s]*)/gm;
     let match = pattern.exec(smallText);
-    return match[2].replace(new RegExp(partstr, 'g'), '').replace(/(\.|,|\s)+$/, '')
+    if (match !== null)
+        return match[2].replace(new RegExp(partstr, 'g'), '').replace(/(\.|,|\s)+$/, '')
+    
+    match = pattern2.exec(smallText);
+        return match[2]
 }
 
 function extractPart(smallText) {

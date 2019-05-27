@@ -2,11 +2,6 @@ var mysql = require('mysql2/promise');
 let dbName = "greenbugDb";
 const Readable = require('stream').Readable
 
-//mysql -containername : mysql01 -root/ pass1234 - 3306
-
-
-
-
 module.exports = async function ({ cities, bookParts, relations }) {
 
     console.log("Start mysql import")

@@ -143,18 +143,4 @@ module.exports = async function ({ cities, bookParts, relations }) {
         });
     })
    
-
-
-    // local stream
-    /*
-    const sql = 'source ./stream.sql;';
-    await con.query({
-        sql: sql,
-        infileStreamFactory: function (path) { console.log("make a stream for "+path); return stream }
-    });
-
-    console.log("done");*/
-
-    
-
 }
