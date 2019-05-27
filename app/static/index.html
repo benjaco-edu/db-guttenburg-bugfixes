@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <span>Gutenberg</span>
+        <div>
+            <span>MySQL</span>
+            <label class="switch">
+                <input type="checkbox">
+                <span class="slider round"></span>
+            </label>
+            <span>MongoDB</span>
+        </div>
+    </header>
+    <main>
+        <aside>
+            <div class="menu">
+                <p>1. Books mentioned a city <i class="arrow right"></i></p>
+                <p>2. Cities in book <i class="arrow right"></i></p>
+                <p>3. Cities mentioned by author <i class="arrow right"></i></p>
+                <p>4. Search by map <i class="arrow right"></i></p>
+             </div>
+        </aside>
+        <div id="map"></div>
+    </main>
+    <footer>
+        <div id="lq_c">
+            <div id="last_query">
+                Select * in ur face
+            </div>
+        </div>
+        <div id="lqs_c">
+            <span>Time</span>
+            <div id="last_query_speed">
+                500ms
+            </div>
+        </div>
+    </footer>
+
+    <script src="gmaps.js"></script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyClSiRP0wR-uA-sx0hFvN0_O-B6NCrLnYA&callback=myMap"></script>
+</body>
+</html>
