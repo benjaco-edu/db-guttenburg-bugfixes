@@ -4,7 +4,7 @@ let DbName = "greenbugDb"
 const mysql = require('mysql2');
 let MongoClient = require('mongodb').MongoClient;
  
-var url = "mongodb://localhost:27017/" + DbName;
+var url = "mongodb://home.regon.dk:27017/" + DbName;
 // create the connection to database
 const connection = mysql.createConnection({
   host: 'home.regon.dk',
@@ -33,10 +33,9 @@ let queries = {
                     {$project:{Ref:"$booksRef", coords: "$coordinate"}},
                     {$lookup:{ from: "Books", localField: "Ref", foreignField: "id", as: "Result"}},
                     {$project:{            
-                        Author:{$arrayElemAt:["$Result.author",0]},             
-                        Title:{$arrayElemAt:["$Result.title",0]}, 
-                        BookId:{$arrayElemAt:["$Result.id",0] },
-                        Coords: "$coords"
+                        author:{$arrayElemAt:["$Result.author",0]},             
+                        title:{$arrayElemAt:["$Result.title",0]}, 
+                        id:{$arrayElemAt:["$Result.id",0] }
                     }}
                 ]
             }
@@ -162,7 +161,7 @@ app.get('/execute/3/:engine/:lat/:lng/:range', (req, res)=>{
         return;   
     }
 
-    res.json({error: "ERR CODE: Eat some nails and gime the right query"})
+    res.json({error: "ERR CODE: Eat some nails and gimme the right query"})
 })
 
 
@@ -211,7 +210,7 @@ app.get('/execute/:query/:engine/:param',(req, res)=>{
 
 });
 
-app.use(express.static('static'))
+app.use(express.static(__dirname+'/static'))
 
 app.listen(8002, _=>{
     console.log("Come at bee-movie bro")

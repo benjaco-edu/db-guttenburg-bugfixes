@@ -52,7 +52,8 @@ main{
 }
 aside{
     width: 270px;
-    overflow: auto
+    overflow-y: scroll;
+    height: 100%;
 }
 
 .menu > p {
@@ -135,4 +136,8 @@ aside{
     transform: rotate(-45deg);
     -webkit-transform: rotate(-45deg);
   }
-  
+
+  .right {
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+  }

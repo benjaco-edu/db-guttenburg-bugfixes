@@ -7,6 +7,46 @@
     <title>Document</title>
     <link rel="stylesheet" href="style.css"/>
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+
+    <script>
+        function changePage(id){
+            document.querySelector(".menu").style.display = "none";
+            document.querySelector("#ex"+id).style.display = "block";
+        }
+        function goBack(id){
+            document.querySelector(".menu").style.display = "block";
+            document.querySelector("#ex"+id).style.display = "none";
+        }
+
+        function runQuery(id, argument){
+            
+            let engine = (document.getElementById("engine").value ? "mongo" : "mysql");
+            
+            return fetch(`/execute/${id}/${engine}/${argument}`)
+                .then(r => r.json())
+                .then(r => {
+                    document.getElementById("last_query_speed").innerHTML = r.time;
+                    if(engine === "mysql"){
+                        document.getElementById("last_query").innerHTML = r.query;
+                    }else{
+                        document.getElementById("last_query").innerHTML = JSON.stringify(r.query, null, 2);
+                    }
+
+                    return r.data;
+                })
+            
+        }
+        
+        async function ExecuteCityName(name){
+            console.log(name);
+            
+            let data = await runQuery(0, name)
+
+            document.getElementById("ex1_res").innerHTML = JSON.stringify(data)
+            
+        }
+    </script>
+
 </head>
 <body>
     <header>
@@ -14,7 +54,7 @@
         <div>
             <span>MySQL</span>
             <label class="switch">
-                <input type="checkbox">
+                <input type="checkbox" id="engine">
                 <span class="slider round"></span>
             </label>
             <span>MongoDB</span>
@@ -23,10 +63,20 @@
     <main>
         <aside>
             <div class="menu">
-                <p>1. Books mentioned a city <i class="arrow right"></i></p>
+                <p onclick="changePage(1)">1. Books mentioned a city <i class="arrow right"></i></p>
                 <p>2. Cities in book <i class="arrow right"></i></p>
                 <p>3. Cities mentioned by author <i class="arrow right"></i></p>
                 <p>4. Search by map <i class="arrow right"></i></p>
+             </div>
+
+             
+             <div id="ex1" style="display: none;">
+                <div class="title"><i class="arrow left"></i> Books mentioned a city</div>
+                <input type="text" id="CityName" placeholder="Enter city name" /> <input type="button" value="Execute"  onclick="ExecuteCityName(document.getElementById('CityName').value)"/>
+                <div id="ex1_res">
+                    
+                
+                </div>
              </div>
         </aside>
         <div id="map"></div>
