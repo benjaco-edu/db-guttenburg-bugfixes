@@ -2,7 +2,7 @@ let fs = require("fs");
 const readCity = require('../common/readCity');
 
 let mysqlImporter = require("./mysqlImporter");
-//let mongoDbImporter = require("./mongoDbImporter");
+let mongoDbImporter = require("./mongoDbImporter");
 
 Object.filter = function( obj, predicate) {
     var result = {}, key;
@@ -16,9 +16,11 @@ Object.filter = function( obj, predicate) {
     return result;
 };
 
-let booksAndCities = JSON.parse(fs.readFileSync("../booksAndCities.json"))
+let booksAndCities = JSON.parse(fs.readFileSync("booksAndCitiesComplete.json"))
 delete booksAndCities["13655.txt.20041109"]
+let noWithErrors = booksAndCities.length;
 booksAndCities = Object.filter(booksAndCities, i => typeof i.error === "undefined" )
+console.log(noWithErrors - booksAndCities.length, "was removed because those where flagged with errors")
 
 //"9768.txt":{"error":"Error","cities":[{"index":3936,"cityIndex":"21399"}
 
@@ -56,7 +58,7 @@ async function insertIntoMysql(cities){
 }
 
 async function insertIntoMongo(){
-
+    await mongoDbImporter()
 }
 
 
@@ -64,7 +66,9 @@ async function insertIntoMongo(){
     let { objects: cities } = await readCity("cities15000.txt");
 
 
+    console.log("----- Generating mysql statements -----")
     await insertIntoMysql(cities);
+    console.log("----- Inserting into mongo db -----")
     await insertIntoMongo();
     
 

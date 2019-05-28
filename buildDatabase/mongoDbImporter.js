@@ -14,9 +14,6 @@ Object.filter = function( obj, predicate) {
     return result;
 };
 
-let fs = require("fs")
-let file = JSON.parse(fs.readFileSync('../booksAndCities.json'))
-const readCity = require('../common/readCity');
 
 function getAllBookObjects(file) {
     return Object.entries(file).map(x => {
@@ -52,17 +49,8 @@ function getAllLocationObjects(cities, locationToBookRefs) {
     })
 }
 
-let booksAndCities = JSON.parse(fs.readFileSync("../booksAndCities.json"))
-booksAndCities = Object.filter(booksAndCities, i => typeof i.error === "undefined" )
 
-async function main() {
-
-
-    let cities = (await readCity("cities15000.txt")).objects;
-
-    console.log(
-        Math.max(...Object.keys(booksAndCities).map(i => parseInt(i.replace(".txt", ""))))
-    )
+module.exports = async function (cities, booksAndCities) {
 
 
     let locationToBookRefs = Object.entries(booksAndCities)
@@ -87,11 +75,8 @@ async function main() {
     console.log("locations done..");
 
     await dbo.createCollection("Books");
-    await dbo.collection("Books").insertMany(getAllBookObjects(file))
+    await dbo.collection("Books").insertMany(getAllBookObjects(booksAndCities))
 
     console.log("Done")
 
 }
-
-
-main();
