@@ -30,8 +30,7 @@ footer{
     overflow: auto;
     display: flex;
 
-    background: #333333;
-    color: #fff;
+    background: #F0F0F0;
     padding: 16px;
 }
 #lq_c{
@@ -132,12 +131,23 @@ aside{
     padding: 3px;
   }
   
+  .italic{
+    font-style: italic;
+  }
   .right {
+    cursor: pointer;
     transform: rotate(-45deg);
     -webkit-transform: rotate(-45deg);
   }
 
-  .right {
-    transform: rotate(-45deg);
-    -webkit-transform: rotate(-45deg);
+  .left {
+    cursor: pointer;
+    margin: 15px 0px 0px 15px;;    
+    transform: rotate(135deg);
+    -webkit-transform: rotate(135deg);
+  }
+
+  .resultat{
+    overflow: scroll; 
+    height: 300px;
   }

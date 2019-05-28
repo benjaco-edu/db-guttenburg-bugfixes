@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>GreenBug.T App</title>
     <link rel="stylesheet" href="style.css"/>
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
 
     <script>
         function changePage(id){
@@ -19,32 +25,55 @@
         }
 
         function runQuery(id, argument){
-            
-            let engine = (document.getElementById("engine").value ? "mongo" : "mysql");
+
+            let engine = (document.getElementById("engine").checked ? "mongo" : "mysql");
             
             return fetch(`/execute/${id}/${engine}/${argument}`)
                 .then(r => r.json())
                 .then(r => {
                     document.getElementById("last_query_speed").innerHTML = r.time;
                     if(engine === "mysql"){
-                        document.getElementById("last_query").innerHTML = r.query;
+                        document.getElementById("last_query").innerHTML =  `<pre><code class="sql">${r.query}</code></pre>`;
                     }else{
-                        document.getElementById("last_query").innerHTML = JSON.stringify(r.query, null, 2);
+                        document.getElementById("last_query").innerHTML = `<pre><code class="json">${JSON.stringify(r.query, null, 2)}</code></pre>`;
                     }
+                    hljs.highlightBlock(document.getElementById("last_query"));
 
                     return r.data;
                 })
-            
         }
         
         async function ExecuteCityName(name){
-            console.log(name);
-            
             let data = await runQuery(0, name)
-
             document.getElementById("ex1_res").innerHTML = JSON.stringify(data)
+        }
+
+        async function ExecuteBookTitle(title){
+            console.log("DEBUG: ", title);
+            let data = await runQuery(1, title)
+            document.getElementById("ex2_res").innerHTML = JSON.stringify(data)
             
         }
+
+        async function ExecuteAuthorName(authorName){
+            console.log("DEBUG: ", authorName);
+            let data = await runQuery(2, authorName)
+            document.getElementById("ex3_res").innerHTML = JSON.stringify(data)
+        }
+
+        async function ExecuteGeoLoc(range){
+            console.log("DEBUG : ", range);
+            
+
+            
+            
+            
+        }
+
+        async function updateSliderValue(val) {
+          document.getElementById('adjustedRange').innerHTML=val + " km.";
+        }
+
     </script>
 
 </head>
@@ -63,34 +92,57 @@
     <main>
         <aside>
             <div class="menu">
-                <p onclick="changePage(1)">1. Books mentioned a city <i class="arrow right"></i></p>
-                <p>2. Cities in book <i class="arrow right"></i></p>
-                <p>3. Cities mentioned by author <i class="arrow right"></i></p>
-                <p>4. Search by map <i class="arrow right"></i></p>
+                <p onclick="changePage(1)">1. Books containing cityname <i class="arrow right"></i></p>
+                <p onclick="changePage(2)">2. Cities in book <i class="arrow right"></i></p>
+                <p onclick="changePage(3)">3. Cities mentioned by author <i class="arrow right"></i></p>
+                <p onclick="changePage(4)">4. Geo-location search <i class="arrow right"></i></p>
              </div>
-
              
              <div id="ex1" style="display: none;">
-                <div class="title"><i class="arrow left"></i> Books mentioned a city</div>
+                <div class="title"><i class="arrow left"  onclick="goBack(1)" ></i> Books containing cityname</div>
                 <input type="text" id="CityName" placeholder="Enter city name" /> <input type="button" value="Execute"  onclick="ExecuteCityName(document.getElementById('CityName').value)"/>
-                <div id="ex1_res">
-                    
-                
+                <div id="ex1_res" class="resultat">
                 </div>
              </div>
-        </aside>
+
+            <div id="ex2" style="display:none">
+                <div class="title"><i class="arrow left"  onclick="goBack(2)"></i> Cities in book</div>
+                <input type="text" id="bookTitle" placeholder="Enter book title" /> <input type="button" value="Execute"  onclick="ExecuteBookTitle(document.getElementById('bookTitle').value)"/>
+                <div id="ex2_res" class="resultat">
+                </div>
+            </div>
+
+            <div id="ex3" style="display:none">
+                <div class="title"><i class="arrow left"  onclick="goBack(3)"></i> Cities mentioned by author</div>
+                <input type="text" id="authorName" placeholder="Enter author name" /> <input type="button" value="Execute"  onclick="ExecuteAuthorName(document.getElementById('authorName').value)"/>
+                <div id="ex3_res" class="resultat">
+                </div>
+            </div>
+
+            <div id="ex4" style="display:none">
+                <div class="title"><i class="arrow left"  onclick="goBack(4)"></i> Enter Coordinates</div>
+                <label>Place marker on map (click) </label>
+                <label>Adjust range (10 - 500km)</label>
+                <input type="range" min="10" max="500" id="rangeSlider" value="250" step="10"  oninput="updateSliderValue(this.value)" /><input type="button" value="Execute"  onmouseup="ExecuteGeoLoc( document.getElementById('range').value)"/>
+                <p>Range : <span id="adjustedRange">250 km.</span></p>        
+                <div id="ex4_res" class="resultat">
+                </div>
+            </div>
+
+
+            </aside>
         <div id="map"></div>
     </main>
     <footer>
         <div id="lq_c">
             <div id="last_query">
-                Select * in ur face
+                <span class="italic">Query-statement</span>
             </div>
         </div>
         <div id="lqs_c">
             <span>Time</span>
             <div id="last_query_speed">
-                500ms
+                <span class="italic">Speed (ms)</span>
             </div>
         </div>
     </footer>

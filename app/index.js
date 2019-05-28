@@ -109,8 +109,8 @@ let queries = {
         left join BookLocations on BookLocations.bookparts_id = selectedtitles.id
         left join Locations on Locations.id = BookLocations.location_id`,
 
-        `with author as (select * from BookParts where author = "Abraham Lincoln"),
-        locs as (select id, JSON_OBJECT("name", name, "population", population, "locaation", ST_AsText(coordinate)) as locObj from Locations)
+        `with author as (select * from BookParts where author = ?),
+        locs as (select id, JSON_OBJECT("name", name, "population", population, "location", ST_AsText(coordinate)) as locObj from Locations)
         select author.id, title, part, author, json_arrayagg(locObj) as "locations" from author
         left join BookLocations on BookLocations.bookparts_id = author.id
         left join locs on BookLocations.location_id = locs.id
@@ -128,6 +128,13 @@ app.get('/execute/3/:engine/:lat/:lng/:range', (req, res)=>{
         lat = req.params.lat,
         lng = req.params.lng,
         range = req.params.range;
+
+console.log("query", query);
+console.log("engine", engine);
+console.log("lat", lat);
+console.log("lng", lng);
+console.log("range", range);
+        
 
     let queryToExecture = queries[engine][3];
 
@@ -161,7 +168,7 @@ app.get('/execute/3/:engine/:lat/:lng/:range', (req, res)=>{
         return;   
     }
 
-    res.json({error: "ERR CODE: Eat some nails and gimme the right query"})
+    res.json({error: "ERR CODE: wrong inputformat - use : /execute/:query/:engine/:param"})
 })
 
 
@@ -170,6 +177,14 @@ app.get('/execute/:query/:engine/:param',(req, res)=>{
         engine = req.params.engine,
         param = req.params.param;
     
+
+console.log("query", query);
+console.log("engine", engine);
+console.log("param", param);
+
+
+
+
     let queryToExecture = queries[engine][query];
 
     let timeStart = Date.now();
@@ -180,7 +195,7 @@ app.get('/execute/:query/:engine/:param',(req, res)=>{
             [param],
             function(err, results) {
                 if(err){
-                    return res.json({error: "i fucked up", err})
+                    return res.json({error: "Error executing query: ", err})
                 }
                 let time = Date.now() - timeStart;
                 res.json({
@@ -206,13 +221,13 @@ app.get('/execute/:query/:engine/:param',(req, res)=>{
     }
 
 
-    res.json({error: "ERR CODE: Eat some nails and gime the right query"})
+    res.json({error: "ERR CODE: wrong inputformat - use : /execute/:query/:engine/:param"})
 
 });
 
 app.use(express.static(__dirname+'/static'))
 
 app.listen(8002, _=>{
-    console.log("Come at bee-movie bro")
+    console.log("Server listening on port 8002")
 })
 
