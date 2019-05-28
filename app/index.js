@@ -227,7 +227,7 @@ console.log("param", param);
 
 app.use(express.static(__dirname+'/static'))
 
-app.listen(8002, _=>{
-    console.log("Server listening on port 8002")
+app.listen(8080, _=>{
+    console.log("Server listening on port http://localhost:8080")
 })
 

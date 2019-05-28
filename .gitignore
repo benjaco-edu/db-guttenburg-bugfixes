@@ -3,3 +3,5 @@ node_modules
 .DS_Store
 .vscode
 buildDatabase/test.html
+mysqlScript.sql
+booksAndCitiesComplete.json

@@ -18,9 +18,9 @@ Object.filter = function( obj, predicate) {
 
 let booksAndCities = JSON.parse(fs.readFileSync("booksAndCitiesComplete.json"))
 delete booksAndCities["13655.txt.20041109"]
-let noWithErrors = booksAndCities.length;
+let noWithErrors = Object.keys(booksAndCities).length;
 booksAndCities = Object.filter(booksAndCities, i => typeof i.error === "undefined" )
-console.log(noWithErrors - booksAndCities.length, "was removed because those where flagged with errors")
+console.log(noWithErrors - Object.keys(booksAndCities).length, "was removed because those where flagged with errors")
 
 //"9768.txt":{"error":"Error","cities":[{"index":3936,"cityIndex":"21399"}
 
@@ -38,9 +38,9 @@ async function insertIntoMysql(cities){
             .map(([id, book]) => {
                 return {
                     id: parseInt(id.replace(".txt", "")),
-                    part: book.Part,
-                    title: (book.Title === undefined ? '' : book.Title.substring(0, 249)) ,
-                    author: (book.Authorname === undefined ? '' : book.Authorname.substring(0, 199))
+                    part: (book.Part === undefined ? null : book.Part),
+                    title: (book.Title === undefined || book.Title === null ? '' : book.Title.substring(0, 249)) ,
+                    author: (book.Authorname === undefined || book.Authorname === null ? '' : book.Authorname.substring(0, 199))
                 }
             }),
         relations: Object.entries(booksAndCities)
@@ -57,8 +57,8 @@ async function insertIntoMysql(cities){
     })
 }
 
-async function insertIntoMongo(){
-    await mongoDbImporter()
+async function insertIntoMongo(booksAndCities, cities){
+    await mongoDbImporter(cities, booksAndCities)
 }
 
 
@@ -69,7 +69,7 @@ async function insertIntoMongo(){
     console.log("----- Generating mysql statements -----")
     await insertIntoMysql(cities);
     console.log("----- Inserting into mongo db -----")
-    await insertIntoMongo();
+    await insertIntoMongo(booksAndCities, cities);
     
 
     process.exit();

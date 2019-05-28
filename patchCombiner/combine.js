@@ -54,4 +54,14 @@ for(let key of Object.keys(scrapedTitles)){
     
 }
 
+// final cleanup
+base[61000] = base["2babb10.txt"]
+delete base["2babb10.txt"]
+base[61001] = base["3babb10.txt"]
+delete base["3babb10.txt"]
+base[61002] = base["50bab10.txt"]
+delete base["50bab10.txt"]
+
 fs.writeFileSync("booksAndCitiesComplete.json", JSON.stringify(base, null, 2), 'utf8')
+
+

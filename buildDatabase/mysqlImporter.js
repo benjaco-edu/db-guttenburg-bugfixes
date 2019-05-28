@@ -1,50 +1,13 @@
-var mysql = require('mysql2/promise');
-let dbName = "greenbugDb";
-const Readable = require('stream').Readable
-
-//mysql -containername : mysql01 -root/ pass1234 - 3306
-
-
-
 module.exports = async function ({ cities, bookParts, relations }) {
-
-
     console.log("Start mysql import")
-
-    let con = await mysql.createConnection({
-        host: "localhost",
-        user: "nodejs",
-        password: "nodecode"
-    });
-
-    console.log("Connected")
-
-    await con.execute(`DROP DATABASE if exists ${dbName};`);
-    await con.execute(`CREATE DATABASE ${dbName};`);
-
-
-
-
-
-    con = await mysql.createConnection({
-        host: "localhost",
-        user: "nodejs",
-        password: "nodecode",
-        database: dbName
-    });
-
-    console.log("Connected to "+dbName)
-
-    //const stream = new Readable()
 
     let fs = require('fs');
     try {
-        fs.unlinkSync("somefile.txt")
+        fs.unlinkSync("mysqlScript.sql")
     } catch (error) {
         
     }
-    var stream = fs.createWriteStream('someFile.txt', { flags : 'w' });
-    //stream.pipe(filestream)
+    var stream = fs.createWriteStream('mysqlScript.sql', { flags : 'w' });
     
     //Locations - id, locname, point
     stream.write(`
@@ -120,7 +83,6 @@ module.exports = async function ({ cities, bookParts, relations }) {
         }
     }
     stream.write("COMMIT;")
-
 
     for (let item of relations) {
         stream.write(`insert into BookLocations (bookparts_id, location_id, index_in_book) values (

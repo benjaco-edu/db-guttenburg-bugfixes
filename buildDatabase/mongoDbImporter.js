@@ -51,8 +51,6 @@ function getAllLocationObjects(cities, locationToBookRefs) {
 
 
 module.exports = async function (cities, booksAndCities) {
-
-
     let locationToBookRefs = Object.entries(booksAndCities)
         .map(([index, item]) => {
             return item.cities.map(city => [index, city.cityIndex])
