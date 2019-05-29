@@ -19,10 +19,26 @@ docker cp ./mysqlScript.sql mysqlGreenbug:mysqlScript.sql
 docker exec -it mysqlGreenbug bash
 > mysql -uroot -ppass1234 greenbugDb < mysqlScript.sql
 
+> # Add index
+
+> mysql -uroot -ppass1234
+> > create index i_location on Locations(name);
+> > create index i_title on BookParts(title);  
+> > create index i_author on BookParts(author);
+> > ALTER TABLE Locations ADD SPATIAL INDEX(coordinate);
+
+docker exec -it mongoGreenbug bash
+> mongo
+> > use mongoGreenbug;
+> > db.Locations.createIndex({name:1})
+> > db.Books.createIndex({id:1})
+> > db.Books.createIndex({title:1})
+> > db.Locations.createIndex({id:1})
+> > db.Books.createIndex({author:1})
+> > db.Locations.createIndex( { coordinate : "2dsphere" } )
+
 node app/index.js
 ```
-
-Obs, no indexes created, do it in the application
 
 ## clean up
 
