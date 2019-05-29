@@ -26,4 +26,4 @@ Artefakt for applikations interface [findes her](https://github.com/benjaco-edu/
 Artefakt for applikationstiming, tabelformat [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Artefakt%20Applikationstiming.pdf)<br />
 Artefakt for producer/consumer kode [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Artefakt%20ProducerConsumer.pdf)<br />
 Artefakt for Tidsmåling af queries for databaser, tabelformat [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Tidsm%C3%A5lingDatabaser.pdf)<br />
-Artefakt for specielcase query 4 [findes her]()<br />
+Artefakt for specielcase query 4 [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Artefakt%20%20specielcaseQuery%204.pdf)<br />
