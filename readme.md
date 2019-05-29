@@ -10,6 +10,8 @@ docker exec mysqlGreenbug mysql -uroot -ppass1234 -e "CREATE USER 'nodejs'@'%' I
 
 docker run -d --rm -p 27017:27017 --name mongoGreenbug mongo
 
+npm i
+
 node buildDatabase/index.js
 
 docker cp ./mysqlScript.sql mysqlGreenbug:mysqlScript.sql
@@ -17,7 +19,6 @@ docker cp ./mysqlScript.sql mysqlGreenbug:mysqlScript.sql
 docker exec -it mysqlGreenbug bash
 > mysql -uroot -ppass1234 greenbugDb < mysqlScript.sql
 
-npm i
 node app/index.js
 ```
 
