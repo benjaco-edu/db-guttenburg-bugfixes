@@ -10,7 +10,8 @@ Benjamin Schultz Larsen (cph-bl135)<br />
 Jacob Sørensen (cph-js284)<br />
 <br />
 
-Rapporten kan findes via [dette link](https://github.com/benjaco-edu/db-guttenburg/blob/master/Rapport.pdf)<br />
+<b>Rapporten kan findes via</b> [dette link](https://github.com/benjaco-edu/db-guttenburg/blob/master/Rapport.pdf)<br />
+<br />
 Sourcekoden for applikationen kan findes i mappen [app](https://github.com/benjaco-edu/db-guttenburg/tree/master/app) <br />
 Sourcekoden for database builder koden kan findes i mappen [buildDatabase](https://github.com/benjaco-edu/db-guttenburg/tree/master/buildDatabase) <br />
 Sourcekoden for hjælpefunktioner kan findes i mappen [common](https://github.com/benjaco-edu/db-guttenburg/tree/master/common) <br />
