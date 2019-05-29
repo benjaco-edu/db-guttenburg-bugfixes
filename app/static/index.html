@@ -39,9 +39,9 @@
             document.querySelector("#no_results").style.display = "none"
             document.querySelector("#no_results").innerHTML = "# res"
             document.querySelectorAll(".resultat").forEach(i => i.innerHTML = "")
-            document.getElementById("last_query_speed").innerHTML = "";
-            document.getElementById("last_query_speed_network").innerHTML = "";
-            document.getElementById("last_query").innerHTML = "";
+            document.getElementById("last_query_speed").innerHTML = "...";
+            document.getElementById("last_query_speed_network").innerHTML = "...";
+            document.getElementById("last_query").innerHTML = "...";
         }
 
         let lastFn = false, lastParam;
@@ -89,10 +89,10 @@
                                 .replace(/\{\s*("\$\w*": ["a-zA-Z0-9$]*)\s*\}/g, "{ $1 }")
                                 .replace(/\{\s*("\$\w*"): \{\s*(["a-zA-Z0-9$]*): (["a-zA-Z0-9$]*)\s*\}\s*\}/g, "{ $1: { $2: $3 } }")
                                 .replace(/\{\s*("\$arrayElemAt"): \[\s*(["a-zA-Z0-9$\.]*),\s*(\d)\s*\]\s*\}/g, "{ $1: [$2, $3] }")
-                                .replace(/^\[\s*/, "[ ")
-                                .replace(/\s\]$/, " ]")
                                 .replace(/  {\n.   /g, "  { ")
                                 .replace(/    }\n. /g, "  } ")
+                                .replace(/^\[\s*/, "[ ")
+                                .replace(/\s\]$/, " ]")
                         }</code></pre>`;
 
                     }
@@ -303,15 +303,16 @@
 
 
             await raf();
-                    await raf();
-                    document.getElementById("ex4_res").innerHTML = html;
+            await raf();
+            document.getElementById("ex4_res").innerHTML = html;
 
-                    await raf();
-                    await raf();
-         
+            await raf();
+            await raf();
+    
             for(let location of Object.values(locations)){
                 addCircle(location.point, adjuster(location.counts)/10)
             }
+            await raf();
         }
 
         async function updateSliderValue(val) {
