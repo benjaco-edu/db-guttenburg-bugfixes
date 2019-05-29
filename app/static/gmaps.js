@@ -4,6 +4,20 @@ function myMap(lat, lng){
     var mapProp= {
         center:new google.maps.LatLng(55, 12),
         zoom:3,
+        styles: [
+          {
+            "featureType": "administrative.locality",
+            "elementType": "labels.icon",
+            "stylers": [
+              {
+                "color": "#a2a2a2"
+              },
+              {
+                "weight": 1
+              }
+            ]
+          }
+        ]
       };
     map = new google.maps.Map(document.getElementById("map"), mapProp);
  
