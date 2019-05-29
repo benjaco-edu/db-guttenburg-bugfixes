@@ -1,4 +1,4 @@
-# Gutenberg Projekt - Semester projekt for database, SOFT2019Spring
+# Gutenberg Projekt - Semesterprojekt for database, SOFT2019Spring
 
 
 
