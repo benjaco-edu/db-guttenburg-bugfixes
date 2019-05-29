@@ -272,7 +272,7 @@
                     html += `<div style="margin: 10px 13px;">
                         <p style="font-weight: 600">${location.Title[0]}</p>
                         <p style="font-style: italic">by ${location.Author[0]}</p
-                        <p><span style="font-weight: 600">${location.DistanceInMeters.toFixed(2)}km</span> away in ${location.City}</p>
+                        <p><span style="font-weight: 600">${(location.DistanceInMeters/1000).toFixed(2)}km</span> away in ${location.City}</p>
                     </div>`
                 }
             }
