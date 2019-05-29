@@ -50,7 +50,8 @@ let queries = {
                     {$lookup:{from: "Locations", localField: "locRef" , foreignField: "id" , as: "locationsInBook"}}, 
                     {$project:{
                         locationName:{$arrayElemAt:["$locationsInBook.name",0]}, 
-                        coords:{$arrayElemAt:["$locationsInBook.coordinate",0]}
+                        coords:{$arrayElemAt:["$locationsInBook.coordinate",0]},
+                        location_id:{$arrayElemAt:["$locationsInBook.id",0]}
                     }} 
                 ]
             }
@@ -113,10 +114,9 @@ left join BookParts     on BookParts.id = BookLocations.bookparts_id`,
     select * 
     from BookParts
     where title = ? 
-    limit 1
 )
 select selectedtitles.id,  title,  part,   author,     location_id, 
-       index_in_book,      name,   ST_AsText(coordinate) as coordinate, 
+       index_in_book,      name as locationName,   ST_AsText(coordinate) as coordinate, 
        population,         timezone 
 from selectedtitles
 left join BookLocations on BookLocations.bookparts_id = selectedtitles.id

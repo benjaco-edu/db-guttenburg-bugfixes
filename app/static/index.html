@@ -119,34 +119,18 @@
 
             document.querySelector("#no_results").innerHTML = data.length+" cities mentioned"
 
-
-            if(engine === "mysql"){
-                 data = data.reduce((a, i) => {
-                     if(a[i.id] === undefined){
-                        a[i.id] = {
-                            name: i.name,
-                            coordinate: i.coordinate,
-                            times: 0
-                        }
-                     }
-                     a[i.id].times++
-                     return a;
-
-                 },{})
-            }else{
-                data = data.reduce((a, i) => {
-                     if(a[i._id] === undefined){
-                        a[i._id] = {
-                            name: i.locationName,
-                            coordinate: i.coords.coordinates,
-                            times: 0
-                        }
-                     }
-                     a[i._id].times++
-                     return a;
-
-                 },{})
-            }
+            data = data.reduce((a, i) => {
+                if(a[i.location_id] === undefined){
+                    a[i.location_id] = {
+                        name: i.locationName,
+                        coordinate: i.coordinate || i.coords.coordinates,
+                        times: 0
+                    }
+                }
+                a[i.location_id].times++
+                return a;
+            },{})
+            
             for(let point of Object.values(data).sort((a,b)=>b.times - a.times)){
                 addCircle(point.coordinate, adjuster(point.times))
                 document.getElementById("ex2_res").innerHTML += `
