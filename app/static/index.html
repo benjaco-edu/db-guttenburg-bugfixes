@@ -15,64 +15,316 @@
 
 
     <script>
+        
         function changePage(id){
             document.querySelector(".menu").style.display = "none";
             document.querySelector("#ex"+id).style.display = "block";
+            document.querySelector("#no_results").style.display = "block"
         }
         function goBack(id){
+            if(mapListener){
+                google.maps.event.removeListener(mapListener);
+            }
+            locationOnMap = false;
+            Circle = false;
+            if(Marker){
+                Marker.setMap(null)
+            }
+            Marker = false;
+
+            clearMap();
             document.querySelector(".menu").style.display = "block";
             document.querySelector("#ex"+id).style.display = "none";
+            document.querySelector("#no_results").style.display = "none"
+            document.querySelector("#no_results").innerHTML = "# res"
+            document.querySelectorAll(".resultat").forEach(i => i.innerHTML = "")
         }
 
-        function runQuery(id, argument){
+        let lastFn = false, lastParam;
+        function Execute(fn, ...param){
+            lastFn = fn;
+            lastParam = param;
+            fn(...param)
+        }
+        function callLast(){
+            if(lastFn){
+                lastFn(...lastParam)
+            }
+        }
 
-            let engine = (document.getElementById("engine").checked ? "mongo" : "mysql");
-            
-            return fetch(`/execute/${id}/${engine}/${argument}`)
+        function adjuster(i){
+            return Math.sqrt(i)*15
+        }
+
+        let engine = "mysql";
+
+
+        let raf = ()=> new Promise(res => requestAnimationFrame(res))
+        function runQueryByUrl(url){
+            return fetch(url)
                 .then(r => r.json())
-                .then(r => {
-                    document.getElementById("last_query_speed").innerHTML = r.time;
+                .then(async r =>  {
+                    document.getElementById("last_query_speed").innerHTML = r.time+"ms";
                     if(engine === "mysql"){
+                        document.getElementById("last_query").style.fontSize = "1.2em"
                         document.getElementById("last_query").innerHTML =  `<pre><code class="sql">${r.query}</code></pre>`;
                     }else{
-                        document.getElementById("last_query").innerHTML = `<pre><code class="json">${JSON.stringify(r.query, null, 2)}</code></pre>`;
+                        document.getElementById("last_query").style.fontSize = "1em"
+                        document.getElementById("last_query").innerHTML = `<p><b>${r.query[0]}</b>.aggragate</p><pre><code class="json">${JSON.stringify(r.query[1], null, 2)}</code></pre>`;
                     }
                     hljs.highlightBlock(document.getElementById("last_query"));
+
+                    await raf();
+                    await raf();
 
                     return r.data;
                 })
         }
+
+        function runQuery(id, argument){
+            return runQueryByUrl(`/execute/${id}/${engine}/${argument}`)
+        }
         
         async function ExecuteCityName(name){
+            document.getElementById("ex1_res").innerHTML = "";
+            clearMap();
+            fetch(`/ex1/loc/${engine}/${name}`).then(r => r.json()).then(r => {
+                if(r.length === 0)
+                    return;
+
+                if(engine === "mysql"){
+                    addPin(r[0].locObj)
+                }else{
+                    addPin(r[0].coordinate.coordinates)
+                }
+            })
             let data = await runQuery(0, name)
-            document.getElementById("ex1_res").innerHTML = JSON.stringify(data)
+
+            document.getElementById("ex1_res").innerHTML = data.map(i => `
+                <div style="margin: 10px 13px;">
+                    <p style="font-weight: 600">${i.title}</p>
+                    <p>${i.author}</p>
+                </div>
+            `).join("")
+
+            document.querySelector("#no_results").innerHTML = data.length+" results returned"
+           
         }
 
         async function ExecuteBookTitle(title){
-            console.log("DEBUG: ", title);
-            let data = await runQuery(1, title)
-            document.getElementById("ex2_res").innerHTML = JSON.stringify(data)
+            document.getElementById("ex2_res").innerHTML = "";
+            clearMap();
             
+            let data = await runQuery(1, title)
+
+            document.querySelector("#no_results").innerHTML = data.length+" cities mentioned"
+
+
+            if(engine === "mysql"){
+                 data = data.reduce((a, i) => {
+                     if(a[i.id] === undefined){
+                        a[i.id] = {
+                            name: i.name,
+                            coordinate: i.coordinate,
+                            times: 0
+                        }
+                     }
+                     a[i.id].times++
+                     return a;
+
+                 },{})
+            }else{
+                data = data.reduce((a, i) => {
+                     if(a[i._id] === undefined){
+                        a[i._id] = {
+                            name: i.locationName,
+                            coordinate: i.coords.coordinates,
+                            times: 0
+                        }
+                     }
+                     a[i._id].times++
+                     return a;
+
+                 },{})
+            }
+            for(let point of Object.values(data).sort((a,b)=>b.times - a.times)){
+                addCircle(point.coordinate, adjuster(point.times))
+                document.getElementById("ex2_res").innerHTML += `
+                    <div style="margin: 10px 13px;">
+                        <p style="font-weight: 600">${point.name}</p>
+                        <p>Mentioned ${point.times} times</p>
+                    </div>
+                `;
+
+            }
+
+            document.querySelector("#no_results").innerHTML = Object.keys(data).length+" unique cities returned"
+
         }
 
         async function ExecuteAuthorName(authorName){
             console.log("DEBUG: ", authorName);
-            let data = await runQuery(2, authorName)
-            document.getElementById("ex3_res").innerHTML = JSON.stringify(data)
+
+            document.getElementById("ex3_res").innerHTML = "";
+            clearMap();
+            
+
+            let data = await runQuery(2, authorName);
+
+            let locations = {};
+
+            if(engine === "mysql"){
+
+                
+                for(let author of data){
+                    for(let location of author.locations){
+                        if(locations[location.location] === undefined){
+                            locations[location.location] = {
+                                ...location,
+                                counts: 0
+                            }
+                        }
+                        locations[location.location].counts++;
+                    }
+                }
+
+                
+            }else{
+                for(let location of data){    
+                    let key = JSON.stringify(location.coords.coordinates);
+
+                    if(locations[key] === undefined){
+                        locations[key] = {
+                            ...location,
+                            counts: 0
+                        }
+                    }
+                    locations[key].counts++;
+                }
+            }
+
+            for(let location of Object.values(locations).sort((a,b) => b.counts - a.counts)){
+                addCircle( location.location || location.coords.coordinates, adjuster(location.counts))
+
+                document.getElementById("ex3_res").innerHTML += `
+                    <div style="margin: 10px 13px;">
+                        <p style="font-weight: 600">${location.locationName || location.name}</p>
+                        <p>Mentioned <b>${location.counts}</b> times</p>
+                    </div>
+                `;
+            }
+            document.querySelector("#no_results").innerHTML = Object.keys(locations).length+" unique cities returned"
+
+
+        }
+
+
+
+
+        let mapListener = false;
+        let locationOnMap = false;
+        let Circle = false;
+        let Marker = false;
+
+        async function geoEventInit(){
+            mapListener = google.maps.event.addListener(map, 'click', function(event) {
+
+                locationOnMap = {lat: event.latLng.lat(), lng: event.latLng.lng()}
+
+                if(Marker){
+                    Marker.setPosition(event.latLng)
+                }else{
+                    Marker = addPin([locationOnMap.lng, locationOnMap.lat], false)
+                }
+
+                
+                Execute(ExecuteGeoLoc, document.getElementById('rangeSlider').value)
+            });
         }
 
         async function ExecuteGeoLoc(range){
-            console.log("DEBUG : ", range);
-            
+            if(Circle){
+                Circle.setMap(null)
+                Circle = false;
+            }
+            if(locationOnMap === false) return;
 
+            console.log("DEBUG : ", locationOnMap, range);
+
+            document.getElementById("ex4_res").innerHTML = "";
+            clearMap();
             
-            
-            
+            let data = await runQueryByUrl(`/execute/3/${engine}/${locationOnMap.lat}/${locationOnMap.lng}/${range}`)
+            document.querySelector("#no_results").innerHTML = data.length+" cities mentioned"
+
+            let locations = {}
+            let html = ""
+            if(engine === "mysql"){
+                for(let location of data){
+                    if(locations[location.point] === undefined){
+                        locations[location.point] = {
+                            point:location.point,
+                            counts: 0
+                        }
+                    }
+                    locations[location.point].counts ++;
+                    html += `<div style="margin: 10px 13px;">
+                        <p style="font-weight: 600">${location.title}</p>
+                        <p style="font-style: italic">by ${location.author}</p
+                        <p><span style="font-weight: 600">${parseFloat(location.km_away).toFixed(2)}km</span> away in ${location.name}</p>
+                    </div>`
+                }
+            }else{
+                for(let location of data){
+                    let key = JSON.stringify(location.Coords.coordinates)
+                    if(locations[key] === undefined){
+                        locations[key] = {
+                            point: location.Coords.coordinates,
+                            counts: 0
+                        }
+                    }
+                    locations[key].counts ++;
+
+                    html += `<div style="margin: 10px 13px;">
+                        <p style="font-weight: 600">${location.Title[0]}</p>
+                        <p style="font-style: italic">by ${location.Author[0]}</p
+                        <p><span style="font-weight: 600">${location.DistanceInMeters.toFixed(2)}km</span> away in ${location.City}</p>
+                    </div>`
+                }
+            }
+
+
+            await raf();
+                    await raf();
+                    document.getElementById("ex4_res").innerHTML = html;
+
+                    await raf();
+                    await raf();
+         
+            for(let location of Object.values(locations)){
+                addCircle(location.point, adjuster(location.counts)/10)
+            }
         }
 
         async function updateSliderValue(val) {
-          document.getElementById('adjustedRange').innerHTML=val + " km.";
+
+            document.getElementById('adjustedRange').innerHTML=val + " km.";
+
+            if(Circle){
+                Circle.setRadius(val*1000)
+            }else if(locationOnMap){
+                Circle = addCircle([locationOnMap.lng, locationOnMap.lat], val)
+                Circle.setOptions({
+                    strokeColor: '#000000',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: '#FF0000',
+                    fillOpacity: 0
+                });
+            }
         }
+
+        
 
     </script>
 
@@ -83,7 +335,7 @@
         <div>
             <span>MySQL</span>
             <label class="switch">
-                <input type="checkbox" id="engine">
+                <input type="checkbox" id="engine" onchange="engine = (document.getElementById('engine').checked ? 'mongo' : 'mysql');callLast()">
                 <span class="slider round"></span>
             </label>
             <span>MongoDB</span>
@@ -95,42 +347,62 @@
                 <p onclick="changePage(1)">1. Books containing cityname <i class="arrow right"></i></p>
                 <p onclick="changePage(2)">2. Cities in book <i class="arrow right"></i></p>
                 <p onclick="changePage(3)">3. Cities mentioned by author <i class="arrow right"></i></p>
-                <p onclick="changePage(4)">4. Geo-location search <i class="arrow right"></i></p>
+                <p onclick="changePage(4); geoEventInit()">4. Geo-location search <i class="arrow right"></i></p>
              </div>
              
-             <div id="ex1" style="display: none;">
+             <div id="ex1" class="ex" style="display: none;">
                 <div class="title"><i class="arrow left"  onclick="goBack(1)" ></i> Books containing cityname</div>
-                <input type="text" id="CityName" placeholder="Enter city name" /> <input type="button" value="Execute"  onclick="ExecuteCityName(document.getElementById('CityName').value)"/>
+                <div class="m">
+                    <input type="text" id="CityName" placeholder="Enter city name" /> 
+                    <input type="button" value="Execute"  onclick="Execute(ExecuteCityName, document.getElementById('CityName').value)"/>
+                </div>
                 <div id="ex1_res" class="resultat">
                 </div>
+                
              </div>
 
-            <div id="ex2" style="display:none">
+            <div id="ex2" class="ex"  style="display:none">
                 <div class="title"><i class="arrow left"  onclick="goBack(2)"></i> Cities in book</div>
-                <input type="text" id="bookTitle" placeholder="Enter book title" /> <input type="button" value="Execute"  onclick="ExecuteBookTitle(document.getElementById('bookTitle').value)"/>
+                <div class="m">
+                    <input type="text" id="bookTitle" placeholder="Enter book title" /> 
+                    <input type="button" value="Execute"  onclick="Execute(ExecuteBookTitle, document.getElementById('bookTitle').value)"/>
+                </div>
                 <div id="ex2_res" class="resultat">
                 </div>
             </div>
 
-            <div id="ex3" style="display:none">
+            <div id="ex3"  class="ex" style="display:none">
                 <div class="title"><i class="arrow left"  onclick="goBack(3)"></i> Cities mentioned by author</div>
-                <input type="text" id="authorName" placeholder="Enter author name" /> <input type="button" value="Execute"  onclick="ExecuteAuthorName(document.getElementById('authorName').value)"/>
+                <div class="m">
+                    <input type="text" id="authorName" placeholder="Enter author name" /> 
+                    <input type="button" value="Execute"  onclick="Execute(ExecuteAuthorName, document.getElementById('authorName').value)"/>
+                </div>
                 <div id="ex3_res" class="resultat">
                 </div>
             </div>
 
-            <div id="ex4" style="display:none">
+            <div id="ex4" class="ex"  style="display:none">
                 <div class="title"><i class="arrow left"  onclick="goBack(4)"></i> Enter Coordinates</div>
-                <label>Place marker on map (click) </label>
-                <label>Adjust range (10 - 500km)</label>
-                <input type="range" min="10" max="500" id="rangeSlider" value="250" step="10"  oninput="updateSliderValue(this.value)" /><input type="button" value="Execute"  onmouseup="ExecuteGeoLoc( document.getElementById('range').value)"/>
-                <p>Range : <span id="adjustedRange">250 km.</span></p>        
+                <div class="m">
+                    <label>Place marker on map (click) </label>
+                    <label>Adjust range (10 - 500km)</label>
+                    <input type="range" min="10" max="500" id="rangeSlider" value="250" step="10"  oninput="updateSliderValue(this.value)" 
+                        onmouseup="Execute(ExecuteGeoLoc, document.getElementById('rangeSlider').value)"
+                        onmousedown="updateSliderValue(this.value)"/>
+
+                    <input type="button" value="Execute"  onmouseup="Execute(ExecuteGeoLoc, document.getElementById('rangeSlider').value)"/>
+                    <p>Range : <span id="adjustedRange">250 km.</span></p>    
+                </div>
+                    
                 <div id="ex4_res" class="resultat">
                 </div>
             </div>
 
 
-            </aside>
+            <div id="no_results" style="flex: 0; display: none; background: #eeeeee; border-top: 1px solid #bbbbbb; padding: 15px;">
+                # res
+            </div>
+        </aside>
         <div id="map"></div>
     </main>
     <footer>
