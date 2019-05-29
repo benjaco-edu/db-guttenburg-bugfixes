@@ -186,6 +186,8 @@
                 
                 for(let author of data){
                     for(let location of author.locations){
+                        if(location === null)
+                            continue;
                         if(locations[location.location] === undefined){
                             locations[location.location] = {
                                 ...location,
