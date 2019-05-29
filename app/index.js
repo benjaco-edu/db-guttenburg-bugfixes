@@ -36,7 +36,8 @@ let queries = {
                         author:{$arrayElemAt:["$Result.author",0]},             
                         title:{$arrayElemAt:["$Result.title",0]}, 
                         id:{$arrayElemAt:["$Result.id",0] }
-                    }}
+                    }},
+                    {$sort: {title: 1}}
                 ]
             }
         ],
@@ -108,7 +109,8 @@ mysql: [
 select distinct BookParts.id, BookParts.title,BookParts.author 
 from cities 
 left join BookLocations on BookLocations.location_id = cities.id
-left join BookParts     on BookParts.id = BookLocations.bookparts_id`,
+left join BookParts     on BookParts.id = BookLocations.bookparts_id
+sort by BookParts.title`,
 
 `with selectedtitles as (
     select * 
