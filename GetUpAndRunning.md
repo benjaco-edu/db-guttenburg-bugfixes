@@ -23,6 +23,7 @@ docker exec -it mysqlGreenbug bash
 > # Add index
 
 > mysql -uroot -ppass1234
+> > use greenbugDb;
 > > create index i_location on Locations(name);
 > > create index i_title on BookParts(title);  
 > > create index i_author on BookParts(author);
@@ -30,7 +31,7 @@ docker exec -it mysqlGreenbug bash
 
 docker exec -it mongoGreenbug bash
 > mongo
-> > use mongoGreenbug;
+> > use greenbugDb;
 > > db.Locations.createIndex({name:1})
 > > db.Books.createIndex({id:1})
 > > db.Books.createIndex({title:1})
