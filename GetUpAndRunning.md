@@ -42,6 +42,9 @@ docker exec -it mongoGreenbug bash
 node app/index.js
 ```
 
+<b>Open browser and navigate to localhost:8080</b>
+
+
 ## clean up
 
 ```bash
