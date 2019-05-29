@@ -110,7 +110,7 @@ select distinct BookParts.id, BookParts.title,BookParts.author
 from cities 
 left join BookLocations on BookLocations.location_id = cities.id
 left join BookParts     on BookParts.id = BookLocations.bookparts_id
-sort by BookParts.title`,
+order by BookParts.title`,
 
 `with selectedtitles as (
     select * 
