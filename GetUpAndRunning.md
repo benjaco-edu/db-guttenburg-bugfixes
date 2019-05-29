@@ -1,5 +1,6 @@
 ## Get up and running
 
+Docker and NodeJS 12 is required
 
 ```bash
 unzip booksAndCitiesComplete.json.zip
