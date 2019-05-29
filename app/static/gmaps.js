@@ -4,7 +4,7 @@ function myMap(lat, lng){
     var mapProp= {
         center:new google.maps.LatLng(55, 12),
         zoom:3,
-        /*styles: [
+        styles: [
           {
             "featureType": "administrative.locality",
             "elementType": "labels.icon",
@@ -17,7 +17,7 @@ function myMap(lat, lng){
               }
             ]
           }
-        ]*/
+        ]
       };
     map = new google.maps.Map(document.getElementById("map"), mapProp);
  
@@ -53,10 +53,10 @@ function addCircle(loc, radius = 10){
   }
   
   var marker = new google.maps.Circle({
-    strokeColor: '#0F0',
+    strokeColor: '#000',
     strokeOpacity: 0.5,
     strokeWeight: 2,
-    fillColor: '#0F0',
+    fillColor: '#000',
     fillOpacity: 0.35,
     map: map,
     center: loc,
