@@ -67,11 +67,9 @@ class Schedule {
     let { names: cities } = await readCity("cities15000.txt");
     let errors = ""
 
-
     let producer = new Schedule(allFiles, cpuCount)
 
     producer.createJob = async filename => {
-
 
         try {
             let fileContent = await new Promise(
@@ -101,12 +99,10 @@ class Schedule {
                     cities: bookLocation
                 };
             }
-            
 
         } catch (e) {
             errors += filename +"\n"+ e.toString()+"\n"+"\n";
         }
-
 
         if (Math.random() > .9) {
             fs.writeFileSync('./booksAndCities.json', JSON.stringify(bookAndCities), 'utf8');
@@ -117,7 +113,6 @@ class Schedule {
     await producer.start()
     fs.writeFileSync('./booksAndCities.json', JSON.stringify(bookAndCities), 'utf8');
     fs.writeFileSync('./errors.json', JSON.stringify(errors), 'utf8');
-
 
     process.exit();
 })();
