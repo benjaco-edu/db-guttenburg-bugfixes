@@ -15,7 +15,7 @@ Sourcekoden for applikationen kan findes i mappen [app](https://github.com/benja
 Sourcekoden for database builder koden kan findes i mappen [buildDatabase](https://github.com/benjaco-edu/db-guttenburg/tree/master/buildDatabase) <br />
 Sourcekoden for hjælpefunktioner kan findes i mappen [common](https://github.com/benjaco-edu/db-guttenburg/tree/master/common) <br />
 Sourcekoden for udtræk af data kan findes i mapperne [extract](https://github.com/benjaco-edu/db-guttenburg/tree/master/extractData) og [get_missing_titles](https://github.com/benjaco-edu/db-guttenburg/tree/master/get_missing_titles)<br />
-Sourcekoden for til sammenlægning af data kan findes i mappen [patchCombiner](https://github.com/benjaco-edu/db-guttenburg/tree/master/patchCombiner) <br />
+Sourcekoden til sammenlægning af data kan findes i mappen [patchCombiner](https://github.com/benjaco-edu/db-guttenburg/tree/master/patchCombiner) <br />
 <br />
 For at afprøve og kører applikationen der følger med i besvarelsen se vejledningen i artefakt [GetUpAndRunning](https://github.com/benjaco-edu/db-guttenburg/blob/master/GetUpAndRunning.md)<br />
 
@@ -25,5 +25,5 @@ Artefakt for diagram over applikationen [findes her](https://github.com/benjaco-
 Artefakt for applikations interface [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Artefakt%20Applikationens%20interface.pdf)<br />
 Artefakt for applikationstiming, tabelformat [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Artefakt%20Applikationstiming.pdf)<br />
 Artefakt for producer/consumer kode [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Artefakt%20ProducerConsumer.pdf)<br />
-Artefakt for Tidsmåling af queries for databaser, tabelformat [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Tidsm%C3%A5lingDatabaser.pdf)<br />
+Artefakt for Tidsmåling af queries for databaser, executionplanner [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Tidsm%C3%A5lingDatabaser.pdf)<br />
 Artefakt for specielcase query 4 [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Artefakt%20%20specielcaseQuery%204.pdf)<br />
