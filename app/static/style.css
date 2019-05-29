@@ -28,7 +28,7 @@ header > div{
     margin: 13px 16px;
 }
 footer{
-    height: 160px;
+    height: 250px;
     overflow: auto;
     display: flex;
 
@@ -42,18 +42,23 @@ footer > div {
 }
 #lq_c{
   flex: 1;
-  width: calc(100vw - 100px);
+  width: calc(100vw - 160px);
   padding: 0px 25px 0px 16pxc;
   overflow-y: scroll;
 }
 #lqs_c{
-    width: 100px;
+    width: 160px;
     
 }
 #last_query_speed{
     color: #4CAF50;
     font-size: 2em;
     margin-top: 5px;
+}
+#last_query_speed_network, #last_query_speed_application{
+  color: #4CAF50;
+  font-size: 1.1em;
+  margin-top: 5px;
 }
 main{
     flex: 1;

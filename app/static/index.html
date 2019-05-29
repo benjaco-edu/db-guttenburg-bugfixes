@@ -15,7 +15,8 @@
 
 
     <script>
-        
+        let raf = ()=> new Promise(res => requestAnimationFrame(res))
+
         function changePage(id){
             document.querySelector(".menu").style.display = "none";
             document.querySelector("#ex"+id).style.display = "block";
@@ -38,17 +39,28 @@
             document.querySelector("#no_results").style.display = "none"
             document.querySelector("#no_results").innerHTML = "# res"
             document.querySelectorAll(".resultat").forEach(i => i.innerHTML = "")
+            document.getElementById("last_query_speed").innerHTML = "";
+            document.getElementById("last_query_speed_network").innerHTML = "";
+            document.getElementById("last_query").innerHTML = "";
         }
 
         let lastFn = false, lastParam;
         function Execute(fn, ...param){
             lastFn = fn;
             lastParam = param;
-            fn(...param)
+            callLast()
         }
-        function callLast(){
-            if(lastFn){
-                lastFn(...lastParam)
+        async function callLast(){
+            if(typeof lastFn === "function"){
+                document.getElementById("last_query_speed").innerHTML = "";
+                document.getElementById("last_query_speed_network").innerHTML = "";
+                document.getElementById("last_query_speed_application").innerHTML = "";
+
+                let start = Date.now()
+
+                await lastFn(...lastParam)
+                await raf();
+                document.getElementById("last_query_speed_application").innerHTML = (Date.now()-start)+"ms";
             }
         }
 
@@ -59,18 +71,30 @@
         let engine = "mysql";
 
 
-        let raf = ()=> new Promise(res => requestAnimationFrame(res))
         function runQueryByUrl(url){
+            let start = Date.now()
             return fetch(url)
                 .then(r => r.json())
                 .then(async r =>  {
+                    document.getElementById("last_query_speed_network").innerHTML = (Date.now()-start)+"ms";
+
                     document.getElementById("last_query_speed").innerHTML = r.time+"ms";
                     if(engine === "mysql"){
                         document.getElementById("last_query").style.fontSize = "1.2em"
                         document.getElementById("last_query").innerHTML =  `<pre><code class="sql">${r.query}</code></pre>`;
                     }else{
                         document.getElementById("last_query").style.fontSize = "1em"
-                        document.getElementById("last_query").innerHTML = `<p><b>${r.query[0]}</b>.aggragate</p><pre><code class="json">${JSON.stringify(r.query[1], null, 2)}</code></pre>`;
+                        document.getElementById("last_query").innerHTML = `<p><b>${r.query[0]}</b>.aggragate</p><pre><code class="json">${
+                            JSON.stringify(r.query[1], null, 2)
+                                .replace(/\{\s*("\$\w*": ["a-zA-Z0-9$]*)\s*\}/g, "{ $1 }")
+                                .replace(/\{\s*("\$\w*"): \{\s*(["a-zA-Z0-9$]*): (["a-zA-Z0-9$]*)\s*\}\s*\}/g, "{ $1: { $2: $3 } }")
+                                .replace(/\{\s*("\$arrayElemAt"): \[\s*(["a-zA-Z0-9$\.]*),\s*(\d)\s*\]\s*\}/g, "{ $1: [$2, $3] }")
+                                .replace(/^\[\s*/, "[ ")
+                                .replace(/\s\]$/, " ]")
+                                .replace(/  {\n.   /g, "  { ")
+                                .replace(/    }\n. /g, "  } ")
+                        }</code></pre>`;
+
                     }
                     hljs.highlightBlock(document.getElementById("last_query"));
 
@@ -398,7 +422,15 @@
         <div id="lqs_c">
             <span>Time</span>
             <div id="last_query_speed">
-                <span class="italic">Speed (ms)</span>
+                <span class="italic">Speed</span>
+            </div>
+            <span style="margin-top: 15px;">Time with network</span>
+            <div id="last_query_speed_network">
+                <span class="italic">...</span>
+            </div>
+            <span style="margin-top: 15px;">Time with application</span>
+            <div id="last_query_speed_application">
+                <span class="italic">...</span>
             </div>
         </div>
     </footer>
