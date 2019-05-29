@@ -10,7 +10,7 @@ Benjamin Schultz Larsen (cph-bl135)<br />
 Jacob Sørensen (cph-js284)<br />
 <br />
 
-Rapporten kan findes [dette link](https://github.com/benjaco-edu/db-guttenburg/blob/master/Rapport.pdf)<br />
+Rapporten kan findes via [dette link](https://github.com/benjaco-edu/db-guttenburg/blob/master/Rapport.pdf)<br />
 Sourcekoden for applikationen kan findes i mappen [app](https://github.com/benjaco-edu/db-guttenburg/tree/master/app) <br />
 Sourcekoden for database builder koden kan findes i mappen [buildDatabase](https://github.com/benjaco-edu/db-guttenburg/tree/master/buildDatabase) <br />
 Sourcekoden for hjælpefunktioner kan findes i mappen [common](https://github.com/benjaco-edu/db-guttenburg/tree/master/common) <br />
@@ -26,3 +26,4 @@ Artefakt for applikations interface [findes her](https://github.com/benjaco-edu/
 Artefakt for applikationstiming, tabelformat [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Artefakt%20Applikationstiming.pdf)<br />
 Artefakt for producer/consumer kode [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Artefakt%20ProducerConsumer.pdf)<br />
 Artefakt for Tidsmåling af queries for databaser, tabelformat [findes her](https://github.com/benjaco-edu/db-guttenburg/blob/master/Tidsm%C3%A5lingDatabaser.pdf)<br />
+Artefakt for specielcase query 4 [findes her]()<br />
