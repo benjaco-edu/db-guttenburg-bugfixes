@@ -4,10 +4,10 @@ let DbName = "greenbugDb"
 const mysql = require('mysql2');
 let MongoClient = require('mongodb').MongoClient;
  
-var url = "mongodb://home.regon.dk:27017/" + DbName;
+var url = "mongodb://localhost:27017/" + DbName;
 // create the connection to database
 const connection = mysql.createConnection({
-  host: 'home.regon.dk',
+  host: 'localhost',
   user: 'nodejs',
   password: 'nodecode',
   database: 'greenbugDb'
