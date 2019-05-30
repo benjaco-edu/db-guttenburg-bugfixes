@@ -9,7 +9,10 @@ Yosuke Ueda (cph-yu173)<br />
 Benjamin Schultz Larsen (cph-bl135)<br />
 Jacob Sørensen (cph-js284)<br />
 <br />
-
+<br/>
+<b>Gruppenavn: Greenbug.T</b><br/>
+<br/>
+<br/>
 <b>Rapporten kan findes via</b> [dette link](https://github.com/benjaco-edu/db-guttenburg/blob/master/Rapport.pdf)<br />
 <br />
 Sourcekoden for applikationen kan findes i mappen [app](https://github.com/benjaco-edu/db-guttenburg/tree/master/app) <br />
