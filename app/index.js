@@ -80,6 +80,7 @@ let queries = {
                 return [
                     {$geoNear: {
                          near: { type: "Point", coordinates: coords},
+                            limit: 1e6,
                          distanceField: "distance",
                          maxDistance: range*1000,
                          spherical: true,
@@ -145,12 +146,13 @@ group by author.id`,
 `with cities as (
     select *, ST_Distance(ST_GeomFromText(?, 4326), coordinate)/1000 as km_away 
     from Locations where 
-    ST_Contains(ST_GeomFromText(ST_AsText(ST_Buffer(ST_GeomFromText(?, 0), ?/111.226)), 4326), coordinate)
+    ST_Contains(ST_GeomFromText(ST_AsText(ST_Buffer(ST_GeomFromText(?, 0), (?/111.226)*1.7)), 4326), coordinate)
 )
 select distinct BookParts.id, title, part, author,  ST_AsText(coordinate) as point, km_away, name
 from cities
 inner join BookLocations  on cities.id = BookLocations.location_id
 left join BookParts       on BookParts.id = BookLocations.bookparts_id
+where km_away < ?
 order by km_away`
     ]
 }
@@ -201,7 +203,7 @@ app.get('/execute/3/:engine/:lat/:lng/:range', (req, res)=>{
         let point = `POINT(${lat} ${lng})`
         connection.query(
             queryToExecture,
-            [point, point, range],
+            [point, point, range, range],
             function(err, results) {
                 let time = Date.now() - timeStart;
                 res.json({
