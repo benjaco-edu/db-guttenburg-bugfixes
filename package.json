@@ -13,7 +13,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "cli-progress": "2.1.1",
-    "express": "4.17.1",
+    "express": "4.17.3",
     "fast-csv": "^2.5.0",
     "http-server": "^0.11.1",
     "mongo": "^0.1.0",
